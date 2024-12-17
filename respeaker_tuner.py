@@ -30,7 +30,7 @@ except Exception as e:
 import pixels as ledInterface  # LED control for ReSpeaker
 
 # Audio and Target Settings
-TARGET_FREQ = 440  # Low E string frequency in Hz
+TARGET_FREQ = 440  # Frequency in Hz
 CHUNK = 32768  # Number of audio samples per frame, 
 RATE = 48000  # Sampling rate in Hz
 TOLERANCE = 1.5 # Tolerance range in Hz
