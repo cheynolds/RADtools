@@ -34,7 +34,7 @@ import pixels as ledInterface  # LED control for ReSpeaker
 # Audio and Target Settings
 targetFreq = 440  # String frequency in Hz
 chunkSize = 4096  # Larger buffer size for reduced skipping
-chunkSizeTUNE = 32768 #Tuning chunk size to increase resolution
+chunkSizeTUNE = 8192 #Tuning chunk size to increase resolution
 sampleRate = 48000  # Sampling rate in Hz
 tolerance = 3  # Tolerance range in Hz
 greenDuration = 0.5  # Duration to keep green LED on after correct frequency
@@ -241,19 +241,14 @@ def tuner():
 def processAudio(signal):
     global currentEffect
     if currentEffect == 'overdrive':
-        leds.write(ledOverdriveColor)
         return applyOverdrive(signal)
     elif currentEffect == 'flanger':
-        leds.write(ledFlangerColor)
-        return applyFlanger(signal)
+        return applyFlanger(signal, sampleRate, np.sin(2 * np.pi * np.arange(len(signal)) * 0.5 / sampleRate))
     elif currentEffect == 'tremolo':
-        leds.write(ledTremoloColor)
-        return applyTremolo(signal)
+        return applyTremolo(signal, sampleRate)
     elif currentEffect == 'fuzz':
-        leds.write(ledFuzzColor)
         return applyFuzz(signal)
     else:
-        leds.write([0, 0, 0] * 3)
         return signal
 
 # Shared audio queue between input and output threads
@@ -345,24 +340,30 @@ def menuHandler():
                 if buttonPressCount == 1:
                     displayMenu()
                     currentEffect = None
+                    leds.write([0, 0, 0] * 3)  # Turn off LEDs
                 elif buttonPressCount == 2:
                     print("Tuner mode selected.")
                     tuner()
                 elif buttonPressCount == 3:
                     print("Overdrive mode selected.")
                     currentEffect = 'overdrive'
+                    leds.write(ledOverdriveColor)
                 elif buttonPressCount == 4:
                     print("Tremolo mode selected.")
                     currentEffect = 'tremolo'
+                    leds.write(ledTremoloColor)
                 elif buttonPressCount == 5:
                     print("Flanger mode selected.")
                     currentEffect = 'flanger'
+                    leds.write(ledFlangerColor)
                 elif buttonPressCount == 6:
                     print("Fuzz mode selected.")
                     currentEffect = 'fuzz'
+                    leds.write(ledFuzzColor)
                 buttonPressCount = 0
     except KeyboardInterrupt:
         print("Exiting menu handler...")
+
 
 def main():
     displayMenu()
